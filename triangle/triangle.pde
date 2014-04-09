@@ -7,24 +7,23 @@
  * There are 16 microswitches on the triangle, keys:
  * 0 1 2 3 4 5 6 7 8 9 a b c d e f
  *
- * The front panel button (switch modes) will go to [space]
+ * The front panel button (switch modes) will go to [space] [TODO]
  *
- * Debug mode by pressing period .
+ * Debug mode by pressing period . [TODO]
  *
  * By Eli Baum, 2014.
  */
- 
- 
-// TODO 28 Mar: this could be done better with matrices.
+
 
 /*  Constants for drawing the bars  */
 final int NUM_BARS = 16;
 
-final int HZ_PAD = 64; //px, on the left and right of the bars
+final int HZ_PAD = 64; //px, on the left and right of the screen
 final int BAR_WIDTH = 32;
 final int TOP_PAD = 64;
 final int BOT_PAD = 32;
 int BAR_HEIGHT;
+int spacing;
 
 // upper limit for the graph (percent).
 final float GRAPH_UPPER = 0.3;
@@ -43,6 +42,8 @@ void setup() {
   helv = loadFont("Helvetica-Bold-48.vlw");
   size(800, 600);
   BAR_HEIGHT = height - TOP_PAD - BOT_PAD;
+  
+  spacing = (width - 2 * HZ_PAD) / NUM_BARS; // between bars
 }
 
 void draw() {
@@ -51,7 +52,9 @@ void draw() {
   if (mode) {
     histogram();
   } else {
-    // draw stats
+    /* draw stats
+     * not implemented yet.
+     */
   }
 }
 
@@ -66,10 +69,12 @@ void keyPressed() {
     totalToday++;
   }
   
+  /* not implemented for now.
   else if (key == ' ') {
     // switch modes
     mode = !mode;
   }
+  */
 }
 
 
@@ -77,40 +82,29 @@ void keyPressed() {
 void histogram() {
   // Draws the histogram.
   
-  // Bars first.
-  int i = 0;
+  pushMatrix();
   
-  for(int x = HZ_PAD;
-      x < width - HZ_PAD;
-      x += (width - 2 * HZ_PAD) / NUM_BARS) {
-     
-    float percent = 0.0;
+  translate(HZ_PAD, height - BOT_PAD);
+  
+  for(int b = 0; b < NUM_BARS; b++) {
+    noStroke();
+    fill(0, 64, 128);
     
-    stroke(255);
-    fill(64);
-    rect(x, TOP_PAD, BAR_WIDTH, BAR_HEIGHT);
-    
-    if(totalToday > 0) {
-      noStroke();
-      fill(BAR_COLOR);
-      /* now draw the rectangles. min is to get the upper limit of the graph
-       * truncate if it is too high. i.e. if percent is 51%, then it will
-       * only draw a bar to the max.
-       */
-      percent = float(marbles[i])/totalToday;
-      rect(x + 1, height - BOT_PAD, BAR_WIDTH - 1,
-             -min(percent, GRAPH_UPPER)/GRAPH_UPPER * (BAR_HEIGHT - 1));
-      i++;
+    if (totalToday > 0) {
+      float p = min((float)marbles[b] / totalToday, GRAPH_UPPER);
+      rect(0, 0, BAR_WIDTH, -BAR_HEIGHT * p / GRAPH_UPPER);
     }
     
-    /* draw percent text at bottom of bar.
-     */
-    textFont(helv, 16);
-    textAlign(CENTER);
-    fill(255);
-    text(round(percent * 100), x + BAR_WIDTH/2,
-          TOP_PAD + BAR_HEIGHT - 2);
+    stroke(255);
+    fill(0, 0); // that's transparent black, so we can see the bar underneath.
+    rect(0, 0, BAR_WIDTH, -BAR_HEIGHT);
+
+    // TODO implement percent-text labels.
+  
+    translate(spacing, 0); // move over to next position
   }
+  
+  popMatrix();
   
   // Draw the text
   fill(255);
